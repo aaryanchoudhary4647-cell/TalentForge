@@ -2,8 +2,18 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+
+/* ──────────────────────────────────────────────────────────────
+   FlipBook Login  ·  Applicant ↔ HR
+   
+   Mechanism (identical to the FlorinPop codepen):
+   ─ Two full-height static panels sit left (Applicant) and right (HR).
+   ─ A single half-width .page element is hinged at its LEFT edge,
+     which coincides with the book's centre spine.
+   ─ Front face (purple) = HR invite — covers right panel by default.
+   ─ Back face  (pink)   = Applicant invite — revealed when flipped.
+   ─ rotateY(-180deg) sweeps the page from right → left.
+   ────────────────────────────────────────────────────────────── */
 
 // ─── Shared icon SVGs ────────────────────────────────────────
 
@@ -47,7 +57,7 @@ const css: Record<string, React.CSSProperties> = {
   wrapper: {
     minHeight: "100vh",
     display: "flex", 
-    flexDirection: "column", // <-- ADDED THIS to stack the book and link vertically
+    flexDirection: "column", // <-- ADDED THIS: Stacks children vertically
     alignItems: "center", 
     justifyContent: "center",
     background: "linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%)",
@@ -55,6 +65,7 @@ const css: Record<string, React.CSSProperties> = {
     padding: 24,
   },
 
+  // book
   container: {
     position: "relative" as const,
     width: "min(820px, calc(100vw - 48px))", 
@@ -66,6 +77,7 @@ const css: Record<string, React.CSSProperties> = {
     perspective: 1800,
   },
 
+  // static panels
   panel: {
     position: "absolute" as const,
     top: 0, width: "50%", height: "100%",
@@ -98,7 +110,7 @@ const css: Record<string, React.CSSProperties> = {
   },
   cbRow:   { display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" as const },
   cbLabel: { fontSize: 11, color: "#888", cursor: "pointer", wordBreak: "break-word" as const },
-  terms:   { fontSize: 11, color: "#bbb", cursor: "pointer", transition: "color .2s", wordBreak: "break-word" as const },
+  forgot:  { fontSize: 11, color: "#bbb", cursor: "pointer", transition: "color .2s", wordBreak: "break-word" as const },
 
   signBtn: {
     width: "100%", padding: 12, border: "none", borderRadius: 11,
@@ -117,6 +129,7 @@ const css: Record<string, React.CSSProperties> = {
     cursor: "pointer", transition: "border-color .2s, transform .2s", flexShrink: 0,
   },
 
+  // flipping page
   page: {
     position: "absolute" as const,
     top: 0, left: "50%", width: "50%", height: "100%",
@@ -159,18 +172,15 @@ const css: Record<string, React.CSSProperties> = {
     backdropFilter: "blur(4px)", transition: "background .25s, border-color .25s, transform .2s", whiteSpace: "nowrap" as const,
   },
 
+  // spine
   spine: {
     position: "absolute" as const, top: 0, left: "calc(50% - 1px)", width: 2, height: "100%",
     background: "linear-gradient(to bottom, transparent, rgba(0,0,0,.1) 20%, rgba(0,0,0,.15) 50%, rgba(0,0,0,.1) 80%, transparent)",
     zIndex: 20, pointerEvents: "none" as const,
   },
 
-  errorMsg: {
-    color: "#f5576c", fontSize: 11, marginTop: 6, textAlign: "center" as const, wordBreak: "break-word" as const, lineHeight: 1.4,
-  },
-
   signupLink: {
-    fontSize: 14, 
+    fontSize: 14, // slightly bumped up for better visibility
     color: "#fff", 
     cursor: "pointer", 
     transition: "color .2s",
@@ -180,29 +190,18 @@ const css: Record<string, React.CSSProperties> = {
   },
 };
 
-// ─── SignupForm ──────────────────────────────────────────
+// ─── LoginForm ───────────────────────────────────────────────
 
 interface FormProps {
   title: string;
   subtitle: string;
-  namePlaceholder: string;
   emailPlaceholder: string;
   accentColor: string;
   btnGradient: string;
   btnShadow: string;
-  onSubmit: (name: string, email: string, password: string) => Promise<void>;
-  loading: boolean;
-  error: string;
 }
 
-const SignupForm: React.FC<FormProps> = ({ 
-  title, subtitle, namePlaceholder, emailPlaceholder, accentColor, btnGradient, btnShadow, onSubmit, loading, error 
-}) => {
-  const [name, setName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-
+const LoginForm: React.FC<FormProps> = ({ title, subtitle, emailPlaceholder, accentColor, btnGradient, btnShadow }) => {
   const focusInput = (e: React.FocusEvent<HTMLInputElement>) => {
     e.currentTarget.style.borderColor = accentColor;
     e.currentTarget.style.boxShadow = `0 0 0 3px ${accentColor}22`;
@@ -218,85 +217,42 @@ const SignupForm: React.FC<FormProps> = ({
     { icon: <GitHubIcon />, label: "GitHub" },
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      return;
-    }
-    await onSubmit(name, email, password);
-  };
-
   return (
     <div style={css.panelContent}>
       <h2 style={css.formTitle}>{title}</h2>
       <p style={css.formSubtitle}>{subtitle}</p>
 
-      <label style={css.fieldLabel}>Full Name</label>
-      <input 
-        type="text" 
-        placeholder={namePlaceholder} 
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        style={css.fieldInput} 
-        onFocus={focusInput} 
-        onBlur={blurInput} 
-      />
-      
       <label style={css.fieldLabel}>Email</label>
-      <input 
-        type="email" 
-        placeholder={emailPlaceholder} 
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={css.fieldInput} 
-        onFocus={focusInput} 
-        onBlur={blurInput} 
-      />
-      
+      <input type="email" placeholder={emailPlaceholder} style={css.fieldInput} onFocus={focusInput} onBlur={blurInput} />
       <label style={css.fieldLabel}>Password</label>
-      <input 
-        type="password" 
-        placeholder="••••••••" 
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={css.fieldInput} 
-        onFocus={focusInput} 
-        onBlur={blurInput} 
-      />
-      
-      <label style={css.fieldLabel}>Confirm Password</label>
-      <input 
-        type="password" 
-        placeholder="••••••••" 
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        style={css.fieldInput} 
-        onFocus={focusInput} 
-        onBlur={blurInput} 
-      />
+      <input type="password" placeholder="••••••••" style={css.fieldInput} onFocus={focusInput} onBlur={blurInput} />
 
       <div style={css.formRow}>
         <div style={css.cbRow}>
-          <input type="checkbox" id={`agree-${title}`} style={{ accentColor }} />
-          <label htmlFor={`agree-${title}`} style={css.cbLabel}>I agree to Terms</label>
+          <input type="checkbox" id={`cb-${title}`} style={{ accentColor }} />
+          <label htmlFor={`cb-${title}`} style={css.cbLabel}>Remember me</label>
         </div>
+        <span
+          style={css.forgot}
+          onMouseEnter={(e) => (e.currentTarget.style.color = accentColor)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#bbb")}
+        >
+          Forgot password?
+        </span>
       </div>
-
-      {error && <div style={css.errorMsg}>{error}</div>}
 
       <button
         style={{ ...css.signBtn, background: btnGradient, boxShadow: btnShadow }}
         onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
-        onClick={handleSubmit}
-        disabled={loading}
+        onClick={(e) => e.preventDefault()}
       >
-        {loading ? "Creating account..." : "Create Account"}
+        Sign In
       </button>
 
       <div style={css.divRow}>
         <div style={css.divLine} />
-        <span>or sign up with</span>
+        <span>or continue with</span>
         <div style={css.divLine} />
       </div>
 
@@ -352,37 +308,9 @@ const InviteFace: React.FC<InviteProps> = ({ gradient, icon, title, text, btnLab
 
 // ─── Root ─────────────────────────────────────────────────────
 
-const Signup: React.FC = () => {
-  const [flipped, setFlipped] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState("");
-  
-  // Default un-flipped view shows Candidate panel on the left
-  const [role, setRole] = React.useState<"hr" | "candidate">("candidate");
-  const { signup } = useAuth();
-  const router = useRouter();
-
-  // Flip the book AND switch the role to match the visible panel
-  const flip = () => {
-    setFlipped((p) => !p);
-    setRole((prevRole) => (prevRole === "hr" ? "candidate" : "hr"));
-  };
-
-  const handleSignup = async (name: string, email: string, password: string) => {
-    setError("");
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-    setLoading(true);
-    const result = await signup(name, email, password, role);
-    setLoading(false);
-    if (result.error) {
-      setError(result.error);
-      return;
-    }
-    router.push(role === "hr" ? "/hr" : "/interview");
-  };
+const Login: React.FC = () => {
+  const [flipped, setFlipped] = useState(false);
+  const flip = () => setFlipped((p) => !p);
 
   return (
     <div style={css.wrapper}>
@@ -390,35 +318,27 @@ const Signup: React.FC = () => {
 
       <div style={css.container}>
 
-        {/* ── Static left: Candidate signup ── */}
+        {/* ── Static left: Applicant login ── */}
         <div style={{ ...css.panel, left: 0 }}>
-          <SignupForm
-            title="Join as Candidate"
-            subtitle="Create your candidate account"
-            namePlaceholder="Your name"
+          <LoginForm
+            title="Welcome back"
+            subtitle="Sign in to your applicant account"
             emailPlaceholder="you@example.com"
             accentColor="#667eea"
             btnGradient="linear-gradient(135deg,#667eea,#764ba2)"
             btnShadow="0 8px 20px rgba(102,126,234,.35)"
-            onSubmit={handleSignup}
-            loading={loading}
-            error={error}
           />
         </div>
 
-        {/* ── Static right: HR signup ── */}
+        {/* ── Static right: HR login ── */}
         <div style={{ ...css.panel, right: 0 }}>
-          <SignupForm
-            title="Join as HR"
-            subtitle="Create your HR account"
-            namePlaceholder="Your name"
+          <LoginForm
+            title="Hello, Recruiter"
+            subtitle="Sign in to your HR dashboard"
             emailPlaceholder="hr@company.com"
             accentColor="#f5576c"
             btnGradient="linear-gradient(135deg,#f093fb,#f5576c)"
             btnShadow="0 8px 20px rgba(245,87,108,.35)"
-            onSubmit={handleSignup}
-            loading={loading}
-            error={error}
           />
         </div>
 
@@ -429,25 +349,25 @@ const Signup: React.FC = () => {
             transform: flipped ? "rotateY(-180deg)" : "rotateY(0deg)",
           }}
         >
-          {/* FRONT: Candidate invite (covers right panel by default) */}
+          {/* FRONT: HR invite (covers right panel by default) */}
           <InviteFace
             faceSide="front"
             gradient="linear-gradient(135deg,#667eea 0%,#764ba2 100%)"
-            icon={<ApplicantSVG />}
-            title="Ready for interviews?"
-            text="Build your profile, showcase your skills, and ace your interviews with AI-powered feedback."
-            btnLabel="← Candidate Signup"
+            icon={<HRSvg />}
+            title="Are you hiring?"
+            text="Switch to the HR portal to post roles, shortlist talent, and manage your entire pipeline in one place."
+            btnLabel="HR Login →"
             onFlip={flip}
           />
 
-          {/* BACK: HR invite (covers left panel after flip) */}
+          {/* BACK: Applicant invite (covers left panel after flip) */}
           <InviteFace
             faceSide="back"
             gradient="linear-gradient(135deg,#f093fb 0%,#f5576c 100%)"
-            icon={<HRSvg />}
-            title="Build your talent pipeline?"
-            text="Post roles, interview candidates with AI assistance, and make smarter hiring decisions faster."
-            btnLabel="HR Signup →"
+            icon={<ApplicantSVG />}
+            title="Looking for work?"
+            text="Head back to the applicant portal to explore open roles, track your applications, and land your next opportunity."
+            btnLabel="← Applicant Login"
             onFlip={flip}
           />
         </div>
@@ -457,21 +377,21 @@ const Signup: React.FC = () => {
 
       </div>
 
-      {/* Navigation link positioned neatly below the signup container */}
+      {/* Navigation link positioned neatly below the login container */}
       <div style={{ 
-        marginTop: 32, 
+        marginTop: 32, // Adjusted margin to sit closer to the book
         textAlign: "center", 
         color: "#fff", 
         padding: "0 16px", 
         zIndex: 1,
       }}>
-        <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Already have an account? </span>
-        <Link href="/auth/login" style={css.signupLink}>
-          Sign in
+        <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Don't have an account? </span>
+        <Link href="/auth/signup" style={css.signupLink}>
+          Create one
         </Link>
       </div>
     </div>
   );
 };
 
-export default Signup;
+export default Login;
