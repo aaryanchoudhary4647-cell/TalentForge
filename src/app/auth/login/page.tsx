@@ -60,15 +60,15 @@ const LoginForm: React.FC<FormProps> = ({ title, subtitle, role, isFlipped }) =>
     e.preventDefault();
     setError("");
     setLoading(true);
-    
+
     const result = await login(email, password);
     setLoading(false);
-    
+
     if (result?.error) {
       setError(result.error);
       return;
     }
-    
+
     router.push(role === 'hr' ? '/hr' : '/interview');
   };
 
@@ -91,13 +91,13 @@ const LoginForm: React.FC<FormProps> = ({ title, subtitle, role, isFlipped }) =>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Input 
+        <Input
           id={`email-${role}`} label="Work email" type="email" placeholder="you@company.com"
-          value={email} onChange={e => setEmail(e.target.value)} required 
+          value={email} onChange={e => setEmail(e.target.value)} required
         />
-        <Input 
+        <Input
           id={`pass-${role}`} label="Password" type="password" placeholder="••••••••"
-          value={password} onChange={e => setPassword(e.target.value)} required 
+          value={password} onChange={e => setPassword(e.target.value)} required
         />
 
         <AnimatePresence mode="wait">
@@ -153,7 +153,7 @@ interface InviteProps {
 }
 
 const InviteFace: React.FC<InviteProps> = ({ icon, title, text, btnLabel, faceSide, onFlip }) => (
-  <div 
+  <div
     className={`absolute inset-0 backface-hidden overflow-hidden flex flex-col items-center justify-center px-10 text-center text-white
                 ${faceSide === "back" ? "[transform:rotateY(180deg)] bg-gradient-to-br from-accent to-blue-600" : "bg-gradient-to-br from-primary to-purple-800"}`}
   >
@@ -164,10 +164,10 @@ const InviteFace: React.FC<InviteProps> = ({ icon, title, text, btnLabel, faceSi
     <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-2xl">
       {icon}
     </div>
-    
+
     <h3 className="text-3xl font-extrabold tracking-tight mb-3 text-shadow-sm">{title}</h3>
     <p className="text-sm font-medium opacity-90 leading-relaxed mb-8 max-w-[240px] text-shadow-sm">{text}</p>
-    
+
     <button
       onClick={onFlip}
       className="px-6 py-2.5 rounded-full border-2 border-white/40 bg-white/10 hover:bg-white/20 hover:scale-105 active:scale-95 transition-all backdrop-blur-sm text-sm font-bold tracking-wide shadow-lg"
@@ -182,7 +182,7 @@ const InviteFace: React.FC<InviteProps> = ({ icon, title, text, btnLabel, faceSi
 export default function FlipLoginPage() {
   const [mounted, setMounted] = useState(false);
   const [flipped, setFlipped] = useState(false);
-  
+
   const flip = () => setFlipped((p) => !p);
 
   useEffect(() => {
@@ -198,14 +198,14 @@ export default function FlipLoginPage() {
       <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/10 blur-[120px] rounded-full pointer-events-none" />
 
       {/* Book Container */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="relative w-full max-w-[860px] h-[600px] glass-card shadow-2xl overflow-hidden rounded-3xl"
         style={{ perspective: "2000px" }}
       >
-        
+
         {/* Static Left: Candidate Login */}
         <div className="absolute top-0 left-0 w-1/2 h-full z-0 flex items-center justify-center">
           <LoginForm
@@ -256,7 +256,7 @@ export default function FlipLoginPage() {
         <div className="absolute top-0 left-[calc(50%-1px)] w-[2px] h-full z-30 bg-gradient-to-b from-transparent via-slate-300/40 dark:via-black/40 to-transparent pointer-events-none shadow-sm" />
 
       </motion.div>
-      
+
       <MockBanner />
     </PageWrapper>
   );

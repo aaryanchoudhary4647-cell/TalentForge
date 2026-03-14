@@ -25,23 +25,170 @@ export default function SignupPage() {
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      return;
     }
-    setLoading(true)
-    const result = await signup(name, email, password, role)
-    setLoading(false)
-    if (result.error) {
-      setError(result.error)
-      return
-    }
-    router.push(role === 'hr' ? '/hr' : '/interview')
-  }
+    await onSubmit(name, email, password);
+  };
 
-  if (!mounted) return null
+  return (
+    <div style={css.panelContent}>
+      <h2 style={css.formTitle}>{title}</h2>
+      <p style={css.formSubtitle}>{subtitle}</p>
+
+      <label style={css.fieldLabel}>Full Name</label>
+      <input
+        type="text"
+        placeholder={namePlaceholder}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        style={css.fieldInput}
+        onFocus={focusInput}
+        onBlur={blurInput}
+      />
+
+      <label style={css.fieldLabel}>Email</label>
+      <input
+        type="email"
+        placeholder={emailPlaceholder}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        style={css.fieldInput}
+        onFocus={focusInput}
+        onBlur={blurInput}
+      />
+
+      <label style={css.fieldLabel}>Password</label>
+      <input
+        type="password"
+        placeholder="••••••••"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        style={css.fieldInput}
+        onFocus={focusInput}
+        onBlur={blurInput}
+      />
+
+      <label style={css.fieldLabel}>Confirm Password</label>
+      <input
+        type="password"
+        placeholder="••••••••"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        style={css.fieldInput}
+        onFocus={focusInput}
+        onBlur={blurInput}
+      />
+
+      <div style={css.formRow}>
+        <div style={css.cbRow}>
+          <input type="checkbox" id={`agree-${title}`} style={{ accentColor }} />
+          <label htmlFor={`agree-${title}`} style={css.cbLabel}>I agree to Terms</label>
+        </div>
+      </div>
+
+      {error && <div style={css.errorMsg}>{error}</div>}
+
+      <button
+        style={{ ...css.signBtn, background: btnGradient, boxShadow: btnShadow }}
+        onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
+        onClick={handleSubmit}
+        disabled={loading}
+      >
+        {loading ? "Creating account..." : "Create Account"}
+      </button>
+
+      <div style={css.divRow}>
+        <div style={css.divLine} />
+        <span>or sign up with</span>
+        <div style={css.divLine} />
+      </div>
+
+      <div style={css.socialRow}>
+        {socials.map(({ icon, label }) => (
+          <button
+            key={label}
+            style={css.socBtn}
+            title={label}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = accentColor; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#eaeaf0"; e.currentTarget.style.transform = "translateY(0)"; }}
+          >
+            {icon}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── InviteFace ──────────────────────────────────────────────
+
+interface InviteProps {
+  gradient: string;
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+  btnLabel: string;
+  faceSide: "front" | "back";
+  onFlip: () => void;
+}
+
+const InviteFace: React.FC<InviteProps> = ({ gradient, icon, title, text, btnLabel, faceSide, onFlip }) => (
+  <div style={{ ...css.face, ...(faceSide === "back" ? css.faceBack : {}), background: gradient }}>
+    {/* blobs */}
+    <div style={{ ...css.blob, width: 160, height: 160, top: -44, right: -44 }} />
+    <div style={{ ...css.blob, width: 100, height: 100, bottom: -26, left: -26 }} />
+    <div style={{ ...css.blob, width: 56, height: 56, top: "44%", left: "12%", background: "rgba(255,255,255,.05)" }} />
+
+    <div style={css.iconRing}>{icon}</div>
+    <h3 style={css.inviteTitle}>{title}</h3>
+    <p style={css.inviteText}>{text}</p>
+    <button
+      style={css.switchBtn}
+      onClick={onFlip}
+      onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.24)"; e.currentTarget.style.borderColor = "#fff"; e.currentTarget.style.transform = "scale(1.05)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,.12)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.55)"; e.currentTarget.style.transform = "scale(1)"; }}
+    >
+      {btnLabel}
+    </button>
+  </div>
+);
+
+// ─── Root ─────────────────────────────────────────────────────
+
+const Signup: React.FC = () => {
+  const [flipped, setFlipped] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+  // Default un-flipped view shows Candidate panel on the left
+  const [role, setRole] = React.useState<"hr" | "candidate">("candidate");
+  const { signup } = useAuth();
+  const router = useRouter();
+
+  // Flip the book AND switch the role to match the visible panel
+  const flip = () => {
+    setFlipped((p) => !p);
+    setRole((prevRole) => (prevRole === "hr" ? "candidate" : "hr"));
+  };
+
+  const handleSignup = async (name: string, email: string, password: string) => {
+    setError("");
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    setLoading(true);
+    const result = await signup(name, email, password, role);
+    setLoading(false);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    router.push(role === "hr" ? "/hr" : "/interview");
+  };
 
   return (
     <PageWrapper className="relative flex items-center justify-center min-h-screen px-4 overflow-hidden">
@@ -49,14 +196,14 @@ export default function SignupPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/10 blur-[120px] rounded-full" />
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-md z-10"
       >
         <div className="flex flex-col items-center mb-8">
-          <motion.div 
+          <motion.div
             whileHover={{ scale: 1.05, rotate: 5 }}
             className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center mb-4 shadow-2xl shadow-primary/20"
           >
@@ -70,17 +217,17 @@ export default function SignupPage() {
           <div className="p-8">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="space-y-4">
-                <Input 
+                <Input
                   id="name" label="Full name" type="text" placeholder="Rahul Mehta"
-                  value={name} onChange={e => setName(e.target.value)} required 
+                  value={name} onChange={e => setName(e.target.value)} required
                 />
-                <Input 
+                <Input
                   id="email" label="Work email" type="email" placeholder="rahul@company.com"
-                  value={email} onChange={e => setEmail(e.target.value)} required 
+                  value={email} onChange={e => setEmail(e.target.value)} required
                 />
-                <Input 
+                <Input
                   id="password" label="Password" type="password" placeholder="••••••••"
-                  value={password} onChange={e => setPassword(e.target.value)} required 
+                  value={password} onChange={e => setPassword(e.target.value)} required
                 />
               </div>
 
@@ -92,9 +239,8 @@ export default function SignupPage() {
                       key={r}
                       type="button"
                       onClick={() => setRole(r)}
-                      className={`relative py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${
-                        role === r ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                      }`}
+                      className={`relative py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${role === r ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                        }`}
                     >
                       {role === r && (
                         <motion.div
@@ -114,7 +260,7 @@ export default function SignupPage() {
 
               <AnimatePresence mode="wait">
                 {error && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
@@ -128,13 +274,13 @@ export default function SignupPage() {
                 )}
               </AnimatePresence>
 
-              <Button 
-                type="submit" 
-                loading={loading} 
+              <Button
+                type="submit"
+                loading={loading}
                 className="w-full h-12 rounded-xl group"
               >
                 <span className="flex items-center justify-center gap-2">
-                  Create account 
+                  Create account
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </span>
               </Button>
@@ -154,7 +300,7 @@ export default function SignupPage() {
           </Link>
         </p>
       </motion.div>
-      
+
       <MockBanner />
     </PageWrapper>
   )
