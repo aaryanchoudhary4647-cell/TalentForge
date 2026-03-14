@@ -37,7 +37,7 @@ export default function InterviewPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
-  const questions = MOCK_QUESTIONS  // swap with API call when backend is ready
+  const questions = MOCK_QUESTIONS
   const currentQ = questions[currentIndex]
   const currentTier: Tier = currentQ?.tier || 'intro'
   const progress = ((currentIndex) / questions.length) * 100
@@ -98,16 +98,12 @@ export default function InterviewPage() {
     const newAnswers = [...answers, record]
     setAnswers(newAnswers)
 
-    // TODO: in live mode, call POST /api/session/answer here
-
-    await new Promise(r => setTimeout(r, 500)) // simulate API delay
+    await new Promise(r => setTimeout(r, 500))
     setSubmitting(false)
 
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(i => i + 1)
     } else {
-      // Interview complete — go to report
-      // In live mode, sessionId would come from the API
       router.push('/report/mock-session-1')
     }
   }
@@ -116,27 +112,33 @@ export default function InterviewPage() {
 
   const stressColor = liveStress > 65 ? 'bg-red-400' : liveStress > 35 ? 'bg-amber-400' : 'bg-emerald-400'
   const emotionColors: Record<string, string> = {
-    confident: 'text-emerald-400 bg-emerald-400/10',
-    neutral:   'text-blue-400 bg-blue-400/10',
-    hesitant:  'text-amber-400 bg-amber-400/10',
-    stressed:  'text-red-400 bg-red-400/10',
+    confident: 'text-emerald-600 bg-emerald-500/10',
+    neutral:   'text-accent bg-accent/10',
+    hesitant:  'text-amber-600 bg-amber-500/10',
+    stressed:  'text-red-600 bg-red-500/10',
   }
 
   if (!currentQ) return null
 
   return (
     <PageWrapper className="min-h-screen flex flex-col">
+      {/* Decorative radial blurs */}
+      <div className="fixed top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-accent/5 blur-[100px] pointer-events-none" />
+
       {/* Top bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-[#0a0a0f]/90 border-b border-white/5 backdrop-blur-xl">
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 glass-header">
         <div className="flex items-center gap-2">
-          <Brain size={16} className="text-indigo-400" />
-          <span className="text-white font-semibold text-sm">TalentForge Interview</span>
+          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <Brain size={14} className="text-white" />
+          </div>
+          <span className="text-slate-900 dark:text-white font-extrabold text-sm">TalentForge Interview</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-white/30 text-xs font-mono">
+          <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">
             Q {currentIndex + 1} of {questions.length}
           </span>
-          <div className="flex items-center gap-1.5 text-white/50 text-xs font-mono">
+          <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold">
             <Clock size={12} />
             {formatTime(elapsed)}
           </div>
@@ -144,20 +146,20 @@ export default function InterviewPage() {
       </header>
 
       {/* Progress bar */}
-      <div className="fixed top-[57px] left-0 right-0 h-0.5 bg-white/5 z-50">
-        <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${progress}%` }} />
+      <div className="fixed top-[57px] left-0 right-0 h-1 bg-slate-200/50 dark:bg-white/5 z-50">
+        <div className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500 rounded-r-full" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Tier pills */}
-      <div className="fixed top-[65px] left-0 right-0 flex justify-center gap-2 py-3 bg-[#0a0a0f]/60 backdrop-blur-sm z-40 border-b border-white/4">
+      <div className="fixed top-[65px] left-0 right-0 flex justify-center gap-2 py-3 bg-white/40 dark:bg-black/20 backdrop-blur-sm z-40 border-b border-white/40 dark:border-white/4">
         {TIER_ORDER.map(tier => (
           <div key={tier} className={cn(
-            'px-3 py-1 rounded-full text-xs font-mono border transition-all',
+            'px-3 py-1 rounded-full text-xs font-bold border transition-all uppercase tracking-wider',
             currentTier === tier
-              ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+              ? 'bg-primary/10 border-primary/30 text-primary'
               : tiersCompleted.includes(tier)
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400/60'
-              : 'bg-white/3 border-white/8 text-white/20'
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+              : 'bg-white/40 dark:bg-white/3 border-white/60 dark:border-white/8 text-slate-400'
           )}>
             {tier === currentTier && <span className="mr-1.5">●</span>}
             {TIER_LABELS[tier]}
@@ -166,16 +168,16 @@ export default function InterviewPage() {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 pt-36 pb-10">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 pt-36 pb-10 relative z-10">
         <div className="w-full max-w-2xl">
 
           {/* Question card */}
           <Card className="p-7 mb-5">
             <div className="flex items-start gap-3 mb-5">
-              <span className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 text-xs font-mono flex items-center justify-center shrink-0 mt-0.5">
+              <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
                 {currentIndex + 1}
               </span>
-              <p className="text-white text-lg leading-relaxed font-medium">{currentQ.text}</p>
+              <p className="text-slate-900 dark:text-white text-lg leading-relaxed font-bold">{currentQ.text}</p>
             </div>
             <textarea
               ref={textareaRef}
@@ -184,13 +186,13 @@ export default function InterviewPage() {
               onKeyDown={handleKeyDown}
               placeholder="Type your answer here..."
               rows={6}
-              className="w-full px-4 py-3 rounded-xl bg-white/4 border border-white/8 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all resize-none leading-relaxed"
+              className="w-full px-4 py-3 rounded-xl bg-white/40 dark:bg-slate-900/40 border border-white/60 dark:border-white/8 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all resize-none leading-relaxed backdrop-blur-sm"
             />
             <div className="flex items-center justify-between mt-3">
-              <span className="text-white/20 text-xs font-mono">
+              <span className="text-slate-400 text-xs font-bold">
                 {answer.length} chars
                 {answer.length < 50 && answer.length > 0 && (
-                  <span className="text-amber-400/60 ml-2">— try to elaborate more</span>
+                  <span className="text-amber-500 ml-2">— try to elaborate more</span>
                 )}
               </span>
               <Button onClick={handleNext} loading={submitting} disabled={!answer.trim() || answer.length < 10} className="gap-2">
@@ -202,32 +204,32 @@ export default function InterviewPage() {
           {/* Live analysis panel */}
           <div className="grid grid-cols-2 gap-4">
             {/* Stress meter */}
-            <Card className="p-4">
+            <Card className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-white/50 text-xs font-mono uppercase tracking-wide">Stress level</span>
-                <span className="text-white/70 text-xs font-mono">{liveStress}%</span>
+                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Stress level</span>
+                <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">{liveStress}%</span>
               </div>
-              <div className="h-2 rounded-full bg-white/6 overflow-hidden">
+              <div className="h-2.5 rounded-full bg-slate-200/50 dark:bg-slate-800/50 overflow-hidden">
                 <div className={cn('h-full rounded-full transition-all duration-700', stressColor,
                   liveStress > 65 ? 'stress-pulse' : '')}
                   style={{ width: `${liveStress}%` }}
                 />
               </div>
-              <p className="text-white/25 text-xs mt-2">
+              <p className="text-slate-400 text-xs mt-2 font-medium">
                 {liveStress > 65 ? 'High stress detected' : liveStress > 35 ? 'Mild hesitation' : 'Relaxed response'}
               </p>
             </Card>
 
             {/* Emotion */}
-            <Card className="p-4">
+            <Card className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-white/50 text-xs font-mono uppercase tracking-wide">Detected emotion</span>
+                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Detected emotion</span>
               </div>
-              <div className={cn('inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium capitalize', emotionColors[liveEmotion])}>
+              <div className={cn('inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold capitalize', emotionColors[liveEmotion])}>
                 {liveEmotion}
               </div>
               {detectHedging(answer) > 0 && (
-                <div className="flex items-center gap-1.5 mt-2 text-amber-400/60 text-xs">
+                <div className="flex items-center gap-1.5 mt-2 text-amber-500 text-xs font-medium">
                   <AlertCircle size={11} />
                   {detectHedging(answer)} hedging phrase{detectHedging(answer) > 1 ? 's' : ''} detected
                 </div>

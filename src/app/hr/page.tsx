@@ -15,29 +15,28 @@ export default function HRDashboard() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<'overview' | 'candidates' | 'jobs'>('overview')
 
-  // In live mode this would fetch from Supabase — for now uses mock data
   const jobs = MOCK_JOBS
   const candidates = MOCK_CANDIDATES
 
   const handleLogout = async () => { await logout(); router.push('/') }
 
   const stats = [
-    { label: 'Active jobs', value: jobs.length, icon: <Briefcase size={16} />, color: 'text-indigo-400' },
-    { label: 'Total candidates', value: candidates.length, icon: <Users size={16} />, color: 'text-blue-400' },
-    { label: 'Hire signals', value: candidates.filter(c => c.hr_signal === 'hire').length, icon: <TrendingUp size={16} />, color: 'text-emerald-400' },
-    { label: 'Avg score', value: `${Math.round(candidates.reduce((a, c) => a + c.overall_score, 0) / candidates.length)}`, icon: <TrendingUp size={16} />, color: 'text-amber-400' },
+    { label: 'Active jobs', value: jobs.length, icon: <Briefcase size={16} />, color: 'text-primary' },
+    { label: 'Total candidates', value: candidates.length, icon: <Users size={16} />, color: 'text-accent' },
+    { label: 'Hire signals', value: candidates.filter(c => c.hr_signal === 'hire').length, icon: <TrendingUp size={16} />, color: 'text-emerald-500' },
+    { label: 'Avg score', value: `${Math.round(candidates.reduce((a, c) => a + c.overall_score, 0) / candidates.length)}`, icon: <TrendingUp size={16} />, color: 'text-amber-500' },
   ]
 
   return (
     <PageWrapper>
       {/* Sidebar */}
-      <div className="fixed left-0 top-0 bottom-0 w-60 bg-[#0d0d14] border-r border-white/5 flex flex-col z-40">
-        <div className="p-5 border-b border-white/5">
+      <div className="fixed left-0 top-0 bottom-0 w-60 glass-sidebar flex flex-col z-40">
+        <div className="p-5 border-b border-white/20 dark:border-white/5">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-indigo-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
               <Brain size={14} className="text-white" />
             </div>
-            <span className="text-white font-semibold tracking-tight">TalentForge</span>
+            <span className="text-slate-900 dark:text-white font-extrabold tracking-tight">TalentForge</span>
           </div>
         </div>
 
@@ -49,10 +48,10 @@ export default function HRDashboard() {
           ].map(tab => (
             <button key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all text-left ${
                 activeTab === tab.id
-                  ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/20'
-                  : 'text-white/40 hover:text-white/70 hover:bg-white/4'
+                  ? 'bg-primary/10 text-primary border border-primary/20'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
               }`}
             >
               {tab.icon}{tab.label}
@@ -60,17 +59,17 @@ export default function HRDashboard() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/20 dark:border-white/5">
           <div className="flex items-center gap-3 mb-3 px-1">
-            <div className="w-7 h-7 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-xs font-bold">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold ring-2 ring-primary/20">
               {user?.name?.[0] || 'H'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-xs font-medium truncate">{user?.name || 'HR Manager'}</p>
-              <p className="text-white/30 text-xs truncate">{user?.email || 'hr@company.com'}</p>
+              <p className="text-slate-900 dark:text-white text-xs font-bold truncate">{user?.name || 'HR Manager'}</p>
+              <p className="text-slate-400 text-xs truncate">{user?.email || 'hr@company.com'}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-white/40" onClick={handleLogout}>
+          <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-slate-500" onClick={handleLogout}>
             <LogOut size={13} /> Sign out
           </Button>
         </div>
@@ -82,12 +81,12 @@ export default function HRDashboard() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 {activeTab === 'overview' && 'Dashboard'}
                 {activeTab === 'candidates' && 'Candidates'}
                 {activeTab === 'jobs' && 'Job postings'}
               </h1>
-              <p className="text-white/35 text-sm mt-0.5">
+              <p className="text-slate-400 text-sm mt-0.5 font-medium">
                 {IS_MOCK_MODE ? 'Showing demo data — connect Supabase to see real data' : `${user?.org_id || 'Your organisation'}`}
               </p>
             </div>
@@ -102,41 +101,41 @@ export default function HRDashboard() {
               {/* Stats */}
               <div className="grid grid-cols-4 gap-4">
                 {stats.map(s => (
-                  <Card key={s.label} className="p-5">
+                  <Card key={s.label} className="p-5 hover:translate-y-[-4px] transition-all duration-300">
                     <div className={`${s.color} mb-2`}>{s.icon}</div>
-                    <div className="text-2xl font-bold text-white">{s.value}</div>
-                    <div className="text-white/35 text-xs mt-0.5">{s.label}</div>
+                    <div className="text-2xl font-extrabold text-slate-900 dark:text-white">{s.value}</div>
+                    <div className="text-slate-400 text-xs mt-0.5 font-bold uppercase tracking-wider">{s.label}</div>
                   </Card>
                 ))}
               </div>
 
               {/* Recent candidates */}
               <Card className="overflow-hidden">
-                <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
-                  <h2 className="text-white font-medium text-sm">Recent candidates</h2>
-                  <button onClick={() => setActiveTab('candidates')} className="text-indigo-400 text-xs hover:text-indigo-300 flex items-center gap-1">
+                <div className="px-5 py-4 border-b border-white/40 dark:border-white/5 flex items-center justify-between bg-white/30 dark:bg-black/20">
+                  <h2 className="text-slate-900 dark:text-white font-extrabold text-sm uppercase tracking-wider">Recent candidates</h2>
+                  <button onClick={() => setActiveTab('candidates')} className="text-primary text-xs font-black uppercase tracking-widest hover:underline underline-offset-4 flex items-center gap-1">
                     View all <ChevronRight size={12} />
                   </button>
                 </div>
-                <div className="divide-y divide-white/4">
+                <div className="divide-y divide-white/30 dark:divide-white/4">
                   {candidates.slice(0, 3).map(c => (
                     <Link key={c.id} href={`/report/${c.id}`}
-                      className="flex items-center justify-between px-5 py-4 hover:bg-white/2 transition-colors group">
+                      className="flex items-center justify-between px-5 py-4 hover:bg-white/20 dark:hover:bg-white/2 transition-colors group">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-500/15 flex items-center justify-center text-indigo-400 text-xs font-bold">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
                           {c.name[0]}
                         </div>
                         <div>
-                          <p className="text-white text-sm font-medium">{c.name}</p>
-                          <p className="text-white/35 text-xs">{c.job_title}</p>
+                          <p className="text-slate-900 dark:text-white text-sm font-bold">{c.name}</p>
+                          <p className="text-slate-400 text-xs">{c.job_title}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className={`text-sm font-bold ${getScoreColor(c.overall_score)}`}>{c.overall_score}</span>
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-mono capitalize ${getHRSignalStyle(c.hr_signal)}`}>
+                        <span className={`text-xs px-2.5 py-1 rounded-md font-bold capitalize ${getHRSignalStyle(c.hr_signal)}`}>
                           {c.hr_signal}
                         </span>
-                        <ChevronRight size={14} className="text-white/20 group-hover:text-white/50 transition-colors" />
+                        <ChevronRight size={14} className="text-slate-300 group-hover:text-primary transition-colors" />
                       </div>
                     </Link>
                   ))}
@@ -148,39 +147,39 @@ export default function HRDashboard() {
           {/* CANDIDATES TAB */}
           {activeTab === 'candidates' && (
             <Card className="overflow-hidden">
-              <div className="divide-y divide-white/4">
+              <div className="divide-y divide-white/30 dark:divide-white/4">
                 {candidates.map(c => (
                   <Link key={c.id} href={`/report/${c.id}`}
-                    className="flex items-center justify-between px-5 py-4 hover:bg-white/2 transition-colors group">
+                    className="flex items-center justify-between px-5 py-4 hover:bg-white/20 dark:hover:bg-white/2 transition-colors group">
                     <div className="flex items-center gap-4">
-                      <div className="w-9 h-9 rounded-full bg-indigo-500/15 flex items-center justify-center text-indigo-400 font-bold">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
                         {c.name[0]}
                       </div>
                       <div>
-                        <p className="text-white font-medium">{c.name}</p>
-                        <p className="text-white/35 text-xs">{c.job_title}</p>
+                        <p className="text-slate-900 dark:text-white font-bold">{c.name}</p>
+                        <p className="text-slate-400 text-xs">{c.job_title}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 text-sm">
                       <div className="text-center">
                         <div className={`font-bold ${getScoreColor(c.overall_score)}`}>{c.overall_score}</div>
-                        <div className="text-white/25 text-xs">score</div>
+                        <div className="text-slate-400 text-xs font-bold uppercase">score</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-white/70 font-medium">Top {100 - c.percentile_rank}%</div>
-                        <div className="text-white/25 text-xs">percentile</div>
+                        <div className="text-slate-700 dark:text-slate-300 font-bold">Top {100 - c.percentile_rank}%</div>
+                        <div className="text-slate-400 text-xs font-bold uppercase">percentile</div>
                       </div>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-mono capitalize ${getEmotionStyle(c.emotion)}`}>
+                      <span className={`text-xs px-2.5 py-1 rounded-md font-bold capitalize ${getEmotionStyle(c.emotion)}`}>
                         {c.emotion}
                       </span>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-mono capitalize ${getHRSignalStyle(c.hr_signal)}`}>
+                      <span className={`text-xs px-2.5 py-1 rounded-md font-bold capitalize ${getHRSignalStyle(c.hr_signal)}`}>
                         {c.hr_signal}
                       </span>
-                      <div className="flex items-center gap-1 text-white/25 text-xs">
+                      <div className="flex items-center gap-1 text-slate-400 text-xs font-medium">
                         <Clock size={11} />
                         {formatDate(c.completed_at)}
                       </div>
-                      <ChevronRight size={14} className="text-white/20 group-hover:text-indigo-400 transition-colors" />
+                      <ChevronRight size={14} className="text-slate-300 group-hover:text-primary transition-colors" />
                     </div>
                   </Link>
                 ))}
@@ -192,16 +191,16 @@ export default function HRDashboard() {
           {activeTab === 'jobs' && (
             <div className="grid gap-4">
               {jobs.map(j => (
-                <Card key={j.id} className="p-5 hover:border-indigo-500/15 transition-colors">
+                <Card key={j.id} className="p-5 hover:translate-y-[-2px] transition-all duration-300">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-white font-semibold">{j.title}</h3>
-                        <Badge label={j.level} className="text-indigo-400 border-indigo-400/20 bg-indigo-400/10" />
-                        <Badge label={j.domain} className="text-white/40 border-white/10 bg-white/5" />
+                        <h3 className="text-slate-900 dark:text-white font-extrabold">{j.title}</h3>
+                        <Badge label={j.level} className="text-primary border-primary/20 bg-primary/10" />
+                        <Badge label={j.domain} className="text-slate-500 border-slate-300/50 bg-slate-200/30" />
                       </div>
-                      <p className="text-white/40 text-sm line-clamp-2 mb-3">{j.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-white/30">
+                      <p className="text-slate-500 text-sm line-clamp-2 mb-3">{j.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-slate-400 font-medium">
                         <span className="flex items-center gap-1"><Users size={11} /> {j.candidates_count} candidates</span>
                         <span className="flex items-center gap-1"><TrendingUp size={11} /> Avg score: {j.avg_score}</span>
                         <span className="flex items-center gap-1"><Clock size={11} /> {formatDate(j.created_at)}</span>

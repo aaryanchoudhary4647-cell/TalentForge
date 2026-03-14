@@ -19,6 +19,7 @@ interface AuthContextType {
   isMockMode: boolean
   login: (email: string, password: string, role?: UserRole) => Promise<{ error?: string }>
   signup: (name: string, email: string, password: string, role: UserRole) => Promise<{ error?: string }>
+  loginWithGoogle: () => Promise<{ error?: string }>
   logout: () => Promise<void>
 }
 
@@ -113,6 +114,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const loginWithGoogle = async () => {
+    if (IS_MOCK_MODE) {
+      const mockUser = { ...MOCK_USER, name: 'Mock Google User', role: 'candidate' as UserRole }
+      setUser(mockUser)
+      localStorage.setItem('tf_mock_user', JSON.stringify(mockUser))
+      return {}
+    }
+
+    try {
+      const { supabase } = await import('@/lib/supabase')
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        }
+      })
+      if (error) return { error: error.message }
+      return {} // The actual redirect will handle the rest
+    } catch {
+      return { error: 'Google login failed. Please try again.' }
+    }
+  }
+
   const logout = async () => {
     if (IS_MOCK_MODE) {
       localStorage.removeItem('tf_mock_user')
@@ -127,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, isMockMode: IS_MOCK_MODE, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, isMockMode: IS_MOCK_MODE, login, signup, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   )

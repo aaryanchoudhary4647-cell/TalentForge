@@ -20,7 +20,6 @@ export default function SignupPage() {
   const { signup } = useAuth()
   const router = useRouter()
 
-  // Ensure animations only run on the client to prevent hydration errors
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -45,10 +44,10 @@ export default function SignupPage() {
   if (!mounted) return null
 
   return (
-    <PageWrapper className="relative flex items-center justify-center min-h-screen px-4 overflow-hidden bg-[#050505]">
+    <PageWrapper className="relative flex items-center justify-center min-h-screen px-4 overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 blur-[120px] rounded-full" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 blur-[120px] rounded-full" />
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/10 blur-[120px] rounded-full" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -59,57 +58,54 @@ export default function SignupPage() {
         <div className="flex flex-col items-center mb-8">
           <motion.div 
             whileHover={{ scale: 1.05, rotate: 5 }}
-            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center mb-4 shadow-2xl shadow-indigo-500/20"
+            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center mb-4 shadow-2xl shadow-primary/20"
           >
             <Brain size={28} className="text-white" />
           </motion.div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Join TalentForge</h1>
-          <p className="text-white/40 text-sm mt-2">The next generation of AI-driven hiring</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Join TalentForge</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium">The next generation of AI-driven hiring</p>
         </div>
 
-        <Card className="p-0 border-white/10 bg-white/[0.02] backdrop-blur-2xl shadow-2xl overflow-hidden">
+        <Card className="p-0 overflow-hidden shadow-2xl">
           <div className="p-8">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="space-y-4">
                 <Input 
                   id="name" label="Full name" type="text" placeholder="Rahul Mehta"
                   value={name} onChange={e => setName(e.target.value)} required 
-                  className="bg-white/[0.03] border-white/10 focus:border-indigo-500/50 transition-colors"
                 />
                 <Input 
                   id="email" label="Work email" type="email" placeholder="rahul@company.com"
                   value={email} onChange={e => setEmail(e.target.value)} required 
-                  className="bg-white/[0.03] border-white/10 focus:border-indigo-500/50 transition-colors"
                 />
                 <Input 
                   id="password" label="Password" type="password" placeholder="••••••••"
                   value={password} onChange={e => setPassword(e.target.value)} required 
-                  className="bg-white/[0.03] border-white/10 focus:border-indigo-500/50 transition-colors"
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Account Type</label>
-                <div className="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-xl border border-white/5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Account Type</label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-white/30 dark:bg-black/40 rounded-xl border border-white/40 dark:border-white/5 backdrop-blur-sm">
                   {(['hr', 'candidate'] as const).map(r => (
                     <button
                       key={r}
                       type="button"
                       onClick={() => setRole(r)}
-                      className={`relative py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                        role === r ? 'text-white' : 'text-white/40 hover:text-white/60'
+                      className={`relative py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${
+                        role === r ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                       }`}
                     >
                       {role === r && (
                         <motion.div
                           layoutId="active-pill"
-                          className="absolute inset-0 bg-indigo-500/20 border border-indigo-500/30 rounded-lg"
+                          className="absolute inset-0 bg-primary/10 border border-primary/20 rounded-lg"
                           transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                         />
                       )}
                       <span className="relative z-10 flex items-center justify-center gap-2">
                         {r === 'hr' ? 'HR Manager' : 'Candidate'}
-                        {role === r && <CheckCircle2 size={14} className="text-indigo-400" />}
+                        {role === r && <CheckCircle2 size={14} className="text-primary" />}
                       </span>
                     </button>
                   ))}
@@ -125,8 +121,8 @@ export default function SignupPage() {
                     className="overflow-hidden"
                   >
                     <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-red-500" />
-                      <p className="text-red-400 text-xs">{error}</p>
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      <p className="text-red-600 dark:text-red-400 text-xs font-medium">{error}</p>
                     </div>
                   </motion.div>
                 )}
@@ -135,7 +131,7 @@ export default function SignupPage() {
               <Button 
                 type="submit" 
                 loading={loading} 
-                className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/20 group"
+                className="w-full h-12 rounded-xl group"
               >
                 <span className="flex items-center justify-center gap-2">
                   Create account 
@@ -144,16 +140,16 @@ export default function SignupPage() {
               </Button>
 
               <div className="flex items-center justify-center gap-2 mt-2">
-                <ShieldCheck size={14} className="text-white/20" />
-                <span className="text-[10px] text-white/20 uppercase tracking-wider">Secure Enterprise Encryption</span>
+                <ShieldCheck size={14} className="text-slate-400" />
+                <span className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black">Secure Enterprise Encryption</span>
               </div>
             </form>
           </div>
         </Card>
 
-        <p className="text-center text-white/30 text-sm mt-8">
+        <p className="text-center text-slate-500 text-sm mt-8 font-medium">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors underline-offset-4 hover:underline">
+          <Link href="/auth/login" className="text-primary hover:text-primary/80 font-bold transition-colors underline-offset-4 hover:underline">
             Sign in
           </Link>
         </p>

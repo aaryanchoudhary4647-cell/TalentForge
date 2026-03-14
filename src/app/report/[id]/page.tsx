@@ -6,11 +6,7 @@ import { MockBanner } from '@/components/ui/MockBanner'
 import { MOCK_REPORT } from '@/lib/mock-data'
 import { getHRSignalStyle, getScoreColor, getEmotionStyle, cn } from '@/lib/utils'
 
-// In live mode, this page will fetch real data using the session ID from the URL.
-// For now it uses MOCK_REPORT which has all the same shape as the real API response.
-
 export default function ReportPage() {
-  // TODO: useEffect to fetch real report by params.id when backend is ready
   const report = MOCK_REPORT
 
   const signalStyle = getHRSignalStyle(report.hr_signal)
@@ -26,59 +22,66 @@ export default function ReportPage() {
 
   return (
     <PageWrapper>
+      {/* Decorative radial blurs */}
+      <div className="fixed top-0 right-0 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-accent/5 blur-[100px] pointer-events-none" />
+
       {/* Header */}
-      <header className="sticky top-0 z-40 flex items-center justify-between px-8 py-4 bg-[#0a0a0f]/90 border-b border-white/5 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 flex items-center justify-between px-8 py-4 glass-header">
         <div className="flex items-center gap-3">
-          <Link href="/hr" className="flex items-center gap-1.5 text-white/40 hover:text-white text-sm transition-colors">
+          <Link href="/hr" className="flex items-center gap-1.5 text-slate-400 hover:text-primary text-sm font-bold transition-colors">
             <ArrowLeft size={15} /> Dashboard
           </Link>
-          <span className="text-white/15">/</span>
-          <span className="text-white/60 text-sm">Interview Report</span>
+          <span className="text-slate-300">/</span>
+          <span className="text-slate-600 dark:text-slate-400 text-sm font-medium">Interview Report</span>
         </div>
         <div className="flex items-center gap-2">
-          <Brain size={15} className="text-indigo-400" />
-          <span className="text-white text-sm font-semibold">TalentForge</span>
+          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <Brain size={14} className="text-white" />
+          </div>
+          <span className="text-slate-900 dark:text-white text-sm font-extrabold">TalentForge</span>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      <main className="max-w-4xl mx-auto px-6 py-8 space-y-6 relative z-10">
 
         {/* Hero card */}
-        <Card className="p-7">
-          <div className="flex items-start justify-between flex-wrap gap-4">
+        <Card className="p-7 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-60 h-60 bg-primary/10 rounded-full -mr-30 -mt-30 blur-[60px]"></div>
+          <div className="flex items-start justify-between flex-wrap gap-4 relative z-10">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-500/15 flex items-center justify-center text-indigo-400 text-2xl font-bold">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl font-extrabold shadow-lg">
                 {report.candidate_name[0]}
               </div>
               <div>
-                <h1 className="text-white text-xl font-bold">{report.candidate_name}</h1>
-                <p className="text-white/45 text-sm">{report.job_title}</p>
+                <h1 className="text-slate-900 dark:text-white text-xl font-extrabold tracking-tight">{report.candidate_name}</h1>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-semibold">{report.job_title}</p>
               </div>
             </div>
-            <span className={cn('text-sm px-4 py-1.5 rounded-full font-mono capitalize font-medium', signalStyle)}>
+            <span className={cn('text-sm px-4 py-1.5 rounded-md font-bold capitalize', signalStyle)}>
               {report.hr_signal === 'hire' ? '✓ Hire' : report.hr_signal === 'hold' ? '⏸ Hold' : '✕ Reject'}
             </span>
           </div>
 
           {/* 4 key metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-white/3 rounded-xl p-4 text-center">
-              <div className={`text-3xl font-bold ${scoreColor}`}>{report.overall_score}</div>
-              <div className="text-white/35 text-xs mt-1">Overall score</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 relative z-10">
+            <div className="bg-white/30 dark:bg-slate-900/30 rounded-xl p-4 text-center backdrop-blur-sm border border-white/40 dark:border-white/5">
+              <div className={`text-3xl font-extrabold ${scoreColor}`}>{report.overall_score}</div>
+              <div className="text-slate-400 text-xs mt-1 font-bold uppercase tracking-wider">Overall score</div>
             </div>
-            <div className="bg-white/3 rounded-xl p-4 text-center">
-              <div className="text-3xl font-bold text-indigo-400">Top {100 - report.percentile_rank}%</div>
-              <div className="text-white/35 text-xs mt-1">of {report.total_candidates_in_pool} candidates</div>
+            <div className="bg-white/30 dark:bg-slate-900/30 rounded-xl p-4 text-center backdrop-blur-sm border border-white/40 dark:border-white/5">
+              <div className="text-3xl font-extrabold text-primary">Top {100 - report.percentile_rank}%</div>
+              <div className="text-slate-400 text-xs mt-1 font-bold uppercase tracking-wider">of {report.total_candidates_in_pool} candidates</div>
             </div>
-            <div className="bg-white/3 rounded-xl p-4 text-center">
-              <div className="text-3xl font-bold text-emerald-400">{report.role_fit_percentage}%</div>
-              <div className="text-white/35 text-xs mt-1">Role fit score</div>
+            <div className="bg-white/30 dark:bg-slate-900/30 rounded-xl p-4 text-center backdrop-blur-sm border border-white/40 dark:border-white/5">
+              <div className="text-3xl font-extrabold text-emerald-500">{report.role_fit_percentage}%</div>
+              <div className="text-slate-400 text-xs mt-1 font-bold uppercase tracking-wider">Role fit score</div>
             </div>
-            <div className="bg-white/3 rounded-xl p-4 text-center">
-              <div className={`text-lg font-bold capitalize mt-1 ${getEmotionStyle(report.responses[0]?.emotion || 'neutral').split(' ')[0]}`}>
+            <div className="bg-white/30 dark:bg-slate-900/30 rounded-xl p-4 text-center backdrop-blur-sm border border-white/40 dark:border-white/5">
+              <div className={`text-lg font-extrabold capitalize mt-1 ${getEmotionStyle(report.responses[0]?.emotion || 'neutral').split(' ')[0]}`}>
                 {report.responses[0]?.emotion || 'neutral'}
               </div>
-              <div className="text-white/35 text-xs mt-1">Dominant emotion</div>
+              <div className="text-slate-400 text-xs mt-1 font-bold uppercase tracking-wider">Dominant emotion</div>
             </div>
           </div>
         </Card>
@@ -87,12 +90,14 @@ export default function ReportPage() {
         <div className="grid md:grid-cols-2 gap-6">
 
           {/* Scores breakdown */}
-          <Card className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <BarChart3 size={15} className="text-indigo-400" />
-              <h2 className="text-white font-semibold text-sm">Score breakdown</h2>
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="size-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                <BarChart3 size={16} className="text-primary" />
+              </div>
+              <h2 className="text-slate-900 dark:text-white font-extrabold text-sm uppercase tracking-wider">Score breakdown</h2>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-5">
               {Object.entries(dimensionLabels).map(([key, label]) => (
                 <ScoreBar key={key} label={label}
                   value={report.scores_breakdown[key as keyof typeof report.scores_breakdown] as number} />
@@ -101,76 +106,81 @@ export default function ReportPage() {
           </Card>
 
           {/* Role fit */}
-          <Card className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={15} className="text-emerald-400" />
-              <h2 className="text-white font-semibold text-sm">AI role-fit analysis</h2>
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="size-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                <TrendingUp size={16} className="text-emerald-500" />
+              </div>
+              <h2 className="text-slate-900 dark:text-white font-extrabold text-sm uppercase tracking-wider">AI role-fit analysis</h2>
             </div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="text-4xl font-bold text-emerald-400">{report.role_fit_percentage}%</div>
-              <div className="text-white/40 text-sm">match for<br />{report.job_title}</div>
+              <div className="text-5xl font-extrabold text-emerald-500">{report.role_fit_percentage}%</div>
+              <div className="text-slate-500 text-sm font-medium">match for<br />{report.job_title}</div>
             </div>
-            <p className="text-white/50 text-sm leading-relaxed">{report.role_fit_reasoning}</p>
+            <p className="text-slate-500 text-sm leading-relaxed">{report.role_fit_reasoning}</p>
           </Card>
 
           {/* Strengths */}
-          <Card className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <CheckCircle size={15} className="text-emerald-400" />
-              <h2 className="text-white font-semibold text-sm">Strengths identified</h2>
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="size-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                <CheckCircle size={16} className="text-emerald-500" />
+              </div>
+              <h2 className="text-slate-900 dark:text-white font-extrabold text-sm uppercase tracking-wider">Strengths identified</h2>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {report.strengths.map((s, i) => (
-                <div key={i} className="flex items-start gap-2.5 text-sm">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                  <span className="text-white/65">{s}</span>
+                <div key={i} className="flex items-start gap-3 text-sm bg-white/30 dark:bg-slate-900/30 p-3 rounded-xl border border-white/40 dark:border-white/5 backdrop-blur-sm">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">{s}</span>
                 </div>
               ))}
             </div>
           </Card>
 
           {/* Gaps */}
-          <Card className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertCircle size={15} className="text-amber-400" />
-              <h2 className="text-white font-semibold text-sm">Areas to probe</h2>
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="size-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                <AlertCircle size={16} className="text-amber-500" />
+              </div>
+              <h2 className="text-slate-900 dark:text-white font-extrabold text-sm uppercase tracking-wider">Areas to probe</h2>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {report.gaps.map((g, i) => (
-                <div key={i} className="flex items-start gap-2.5 text-sm">
-                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
-                  <span className="text-white/65">{g}</span>
+                <div key={i} className="flex items-start gap-3 text-sm bg-white/30 dark:bg-slate-900/30 p-3 rounded-xl border border-white/40 dark:border-white/5 backdrop-blur-sm">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">{g}</span>
                 </div>
               ))}
             </div>
-            <div className="mt-4 p-3 rounded-xl bg-white/3 border border-white/6">
-              <p className="text-white/40 text-xs leading-relaxed">{report.emotion_summary}</p>
+            <div className="mt-4 p-3 rounded-xl bg-white/20 dark:bg-slate-900/20 border border-white/30 dark:border-white/5 backdrop-blur-sm">
+              <p className="text-slate-500 text-xs leading-relaxed">{report.emotion_summary}</p>
             </div>
           </Card>
         </div>
 
         {/* Per-question breakdown */}
         <Card className="overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/5 flex items-center gap-2">
-            <Users size={15} className="text-indigo-400" />
-            <h2 className="text-white font-semibold text-sm">Per-question breakdown</h2>
+          <div className="px-5 py-4 border-b border-white/40 dark:border-white/5 flex items-center gap-2 bg-white/30 dark:bg-black/20">
+            <div className="size-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <Users size={16} className="text-primary" />
+            </div>
+            <h2 className="text-slate-900 dark:text-white font-extrabold text-sm uppercase tracking-wider">Per-question breakdown</h2>
           </div>
-          <div className="divide-y divide-white/4">
+          <div className="divide-y divide-white/30 dark:divide-white/4">
             {report.responses.map((r, i) => (
-              <div key={r.id} className="px-5 py-4">
+              <div key={r.id} className="px-5 py-5">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-md bg-indigo-500/15 text-indigo-400 text-[10px] font-mono flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
                       {i + 1}
                     </span>
-                    <p className="text-white/70 text-sm">{r.question_text}</p>
+                    <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">{r.question_text}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={cn('text-xs px-2 py-0.5 rounded-full font-mono capitalize',
-                      r.emotion === 'confident' ? 'text-emerald-400 bg-emerald-400/10' :
-                      r.emotion === 'hesitant'  ? 'text-amber-400 bg-amber-400/10' :
-                      r.emotion === 'stressed'  ? 'text-red-400 bg-red-400/10' :
-                      'text-blue-400 bg-blue-400/10')}>
+                    <span className={cn('text-xs px-2.5 py-1 rounded-md font-bold capitalize',
+                      ({ confident: 'text-emerald-600 bg-emerald-500/10', hesitant: 'text-amber-600 bg-amber-500/10', stressed: 'text-red-600 bg-red-500/10' } as Record<string, string>)[r.emotion] || 'text-accent bg-accent/10')}>
                       {r.emotion}
                     </span>
                     <span className={`text-sm font-bold ${getScoreColor(r.scores?.overall || 0)}`}>
@@ -178,8 +188,8 @@ export default function ReportPage() {
                     </span>
                   </div>
                 </div>
-                <p className="text-white/35 text-xs ml-8 line-clamp-2 mb-2">{r.answer_text}</p>
-                <div className="flex items-center gap-4 ml-8 text-[10px] font-mono text-white/20">
+                <p className="text-slate-400 text-xs ml-10 line-clamp-2 mb-2 font-medium">{r.answer_text}</p>
+                <div className="flex items-center gap-4 ml-10 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   <span>Latency: {(r.response_latency_ms / 1000).toFixed(1)}s</span>
                   <span>Hedging: {r.hedging_count}</span>
                   {r.scores && <>
@@ -194,12 +204,13 @@ export default function ReportPage() {
         </Card>
 
         {/* Percentile callout */}
-        <Card className="p-5 border-indigo-500/20 bg-indigo-500/5">
-          <div className="flex items-center gap-3">
-            <div className="text-4xl font-bold text-indigo-400">Top {100 - report.percentile_rank}%</div>
+        <Card className="p-6 border-primary/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full -mr-20 -mt-20 blur-[40px]"></div>
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="text-5xl font-extrabold text-primary">{100 - report.percentile_rank}%</div>
             <div>
-              <p className="text-white font-medium">Percentile rank</p>
-              <p className="text-white/40 text-sm">
+              <p className="text-slate-900 dark:text-white font-extrabold">Percentile rank</p>
+              <p className="text-slate-500 text-sm font-medium">
                 {report.candidate_name} scored better than {report.percentile_rank}% of {report.total_candidates_in_pool} candidates
                 who interviewed for this role.
               </p>
